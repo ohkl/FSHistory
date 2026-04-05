@@ -1,0 +1,36 @@
+name: Build x86_64 Executable
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  pull_request:
+    branches: [ "master", "main" ]
+  workflow_dispatch: # 允许在 GitHub Actions 页面手动触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # ubuntu-latest 默认是 x86_64 架构
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang make libsdl2-dev bzip2
+
+    - name: Build fshistory
+      run: |
+        # 直接运行 make 编译 x86_64 可执行文件 fshistory，并解压数据文件
+        make
+
+    - name: Upload executable artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: fshistory-linux-x86_64
+        path: |
+          fshistory
+          data/
+        # 如果只想上传二进制文件，可以只写 fshistory
+        # 保留 data/ 是因为程序运行通常需要那些 .fs 数据文件
