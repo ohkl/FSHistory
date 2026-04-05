@@ -5,18 +5,16 @@ on:
     branches: [ "master", "main" ]
   pull_request:
     branches: [ "master", "main" ]
-  workflow_dispatch: # 允许手动触发该工作流
+  workflow_dispatch:
 
 jobs:
   build-windows:
     runs-on: windows-latest
 
     steps:
-      # 1. 检出代码
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 2. 设置 MSYS2 环境并安装编译所需的依赖 (gcc, make, sdl2)
       - name: Setup MSYS2
         uses: msys2/setup-msys2@v2
         with:
@@ -28,22 +26,13 @@ jobs:
             mingw-w64-x86_64-SDL2
             make
 
-      # 3. 使用 MSYS2 的 shell 执行 Make 编译
+      # 3. 执行 Make 编译，Windows 编译器会自动生成 fshistory.exe
       - name: Build Windows Binary
         shell: msys2 {0}
         run: |
-          # 执行 make 编译，生成 Windows 可执行文件
           make fshistory
 
-      # 4. （可选）如果生成的没有 .exe 后缀，则加上后缀
-      - name: Add .exe extension (if needed)
-        shell: bash
-        run: |
-          if [ -f "fshistory" ]; then
-            mv fshistory fshistory.exe
-          fi
-
-      # 5. 提取并收集编译完成的文件（将它作为 Artifact 上传以便下载）
+      # 4. 直接上传生成的 fshistory.exe
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
